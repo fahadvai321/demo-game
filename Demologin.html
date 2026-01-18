@@ -1,0 +1,27 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Demo Login Game</title>
+<style>body{    background:#020617;    color:white;    font-family:Arial;    text-align:center;}
+.box{    width:320px;    margin:50px auto;    padding:20px;    background:#0f172a;    border-radius:10px;    box-shadow:0 0 15px #22c55e;}
+input{    padding:8px;    width:90%;    border-radius:5px;    border:none;}
+button{    margin-top:10px;    padding:10px 20px;    font-size:16px;    border:none;    border-radius:6px;    cursor:pointer;    background:#22c55e;}
+button:hover{    background:#16a34a;}
+#leaderboard{    margin-top:15px;    text-align:left;}</style></head>
+<body>
+<!-- LOGIN BOX --><div class="box" id="loginBox">    <h2> Login</h2>    <input id="username" placeholder="Enter username"><br><br>    <button onclick="login()">Login</button></div>
+<!-- GAME BOX --><div class="box" id="gameBox" style="display:none;">    <h2> Spin & Win</h2>    <p>User: <b id="userShow"></b></p>    <p>Coins: <span id="coin">100</span></p>    <button onclick="spin()">SPIN</button>    <p id="result"></p>
+    <button onclick="logout()">Logout</button>
+    <hr>    <h3> Leaderboard</h3>    <div id="leaderboard"></div></div>
+<script>let coins = 100;let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];let currentUser = localStorage.getItem("currentUser");
+if(currentUser){    showGame();}
+function login(){    let name = document.getElementById("username").value;    if(name === ""){        alert("Username required");        return;    }    localStorage.setItem("currentUser", name);    currentUser = name;    showGame();}
+function logout(){    localStorage.removeItem("currentUser");    location.reload();}
+function showGame(){    document.getElementById("loginBox").style.display="none";    document.getElementById("gameBox").style.display="block";    document.getElementById("userShow").innerText = currentUser;    showLeaderboard();}
+function spin(){    if(coins < 10){        document.getElementById("result").innerText=" No coins left";        saveScore();        return;    }
+    coins -= 10;    let win = Math.random() < 0.5;
+    if(win){        coins += 30;        document.getElementById("result").innerText=" You Win!";    }else{        document.getElementById("result").innerText=" You Lose!";    }
+    document.getElementById("coin").innerText=coins;    saveScore();}
+function saveScore(){    let player = leaderboard.find(p=>p.name===currentUser);
+    if(player){        player.score = coins;    }else{        leaderboard.push({name:currentUser, score:coins});    }
+    leaderboard.sort((a,b)=>b.score-a.score);    leaderboard = leaderboard.slice(0,5);
+    localStorage.setItem("leaderboard", JSON.stringify(leaderboard));    showLeaderboard();}
+function showLeaderboard(){    let html="";    leaderboard.forEach((p,i)=>{        html += `${i+1}. ${p.name} - ${p.score} coins<br>`;    });    document.getElementById("leaderboard").innerHTML = html;}</script>
+</body></html>
